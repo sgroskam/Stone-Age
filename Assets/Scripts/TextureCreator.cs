@@ -5,7 +5,9 @@ public class TextureCreator : MonoBehaviour
 {
 	[Range(2, 512)]
 	public int resolution = 256;
-	public float frequency = 1.0f;
+	[Range(1, 3)]
+	public int dimensions = 3;
+	public float frequency = 128.0f;
 	private Texture2D texture;
 
 	private void OnEnable()
@@ -43,8 +45,11 @@ public class TextureCreator : MonoBehaviour
 		Vector3 point01 = transform.TransformPoint(new Vector3(-0.5f, 0.5f));
 		Vector3 point10 = transform.TransformPoint(new Vector3(0.5f, -0.5f));
 		Vector3 point11 = transform.TransformPoint(new Vector3(0.5f, 0.5f));
-		
+
+		NoiseMethod method = Noise.valueMethods[dimensions - 1];
+
 		float stepSize = 1.0f / resolution;
+
 		for(int y = 0; y < resolution; y++)
 		{
 			//Find the left and right edges.
@@ -56,7 +61,7 @@ public class TextureCreator : MonoBehaviour
 				//cycle through points in each row of the texture.
 				Vector3 point = Vector3.Lerp( point0, point1, ( x + 0.5f) * stepSize);
 
-				texture.SetPixel( x, y, Color.white * Noise.Value(point, frequency));
+				texture.SetPixel( x, y, Color.white * method(point, frequency));
 			}
 		}
 		texture.Apply();
