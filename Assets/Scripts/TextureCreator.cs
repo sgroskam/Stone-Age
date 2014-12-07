@@ -8,6 +8,7 @@ public class TextureCreator : MonoBehaviour
 	[Range(1, 3)]
 	public int dimensions = 3;
 	public float frequency = 128.0f;
+	public NoiseMethodType type;
 	private Texture2D texture;
 
 	private void OnEnable()
@@ -46,7 +47,7 @@ public class TextureCreator : MonoBehaviour
 		Vector3 point10 = transform.TransformPoint(new Vector3(0.5f, -0.5f));
 		Vector3 point11 = transform.TransformPoint(new Vector3(0.5f, 0.5f));
 
-		NoiseMethod method = Noise.valueMethods[dimensions - 1];
+		NoiseMethod method = Noise.noiseMethods[(int) type][dimensions-1];
 
 		float stepSize = 1.0f / resolution;
 
@@ -61,7 +62,13 @@ public class TextureCreator : MonoBehaviour
 				//cycle through points in each row of the texture.
 				Vector3 point = Vector3.Lerp( point0, point1, ( x + 0.5f) * stepSize);
 
-				texture.SetPixel( x, y, Color.white * method(point, frequency));
+				float sample = method( point, frequency);
+				if( type != NoiseMethodType.Value)
+				{
+					sample = sample * 0.5f + 0.5f;
+				}
+
+				texture.SetPixel( x, y, Color.white * sample);
 			}
 		}
 		texture.Apply();
