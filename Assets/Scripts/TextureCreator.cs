@@ -5,10 +5,23 @@ public class TextureCreator : MonoBehaviour
 {
 	[Range(2, 512)]
 	public int resolution = 256;
+
 	[Range(1, 3)]
 	public int dimensions = 3;
+
+	[Range(1, 8)]
+	public int octaves = 1;
+
+	[Range(1f, 4f)]
+	public float lacunarity = 2f;
+	
+	[Range(0f, 1f)]
+	public float persistence = 0.5f;
+
+	public int seed = 16;
 	public float frequency = 128.0f;
 	public NoiseMethodType type;
+	public Gradient coloring;
 	private Texture2D texture;
 
 	private void OnEnable()
@@ -22,6 +35,8 @@ public class TextureCreator : MonoBehaviour
 			texture.anisoLevel = 9;
 			GetComponent<MeshRenderer>().material.mainTexture = texture;
 		}
+		Random.seed = seed;
+		Noise.HashFill();		
 		FillTexture();
 	}
 
@@ -62,13 +77,13 @@ public class TextureCreator : MonoBehaviour
 				//cycle through points in each row of the texture.
 				Vector3 point = Vector3.Lerp( point0, point1, ( x + 0.5f) * stepSize);
 
-				float sample = method( point, frequency);
+				float sample = Noise.Sum( method, point, frequency, octaves, lacunarity, persistence);
 				if( type != NoiseMethodType.Value)
 				{
 					sample = sample * 0.5f + 0.5f;
 				}
 
-				texture.SetPixel( x, y, Color.white * sample);
+				texture.SetPixel( x, y, coloring.Evaluate(sample));
 			}
 		}
 		texture.Apply();
